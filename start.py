@@ -74,13 +74,19 @@ def start_bot_with_webhook():
         logger.info(f"Starting webhook server on port {config.PORT}")
         logger.info(f"Webhook URL: {webhook_url}")
         
+        logger.info("✅ All init done. Running application.run_webhook...")
+        
         # Start webhook mode
-        application.run_webhook(
-            listen="0.0.0.0",
-            port=config.PORT,
-            webhook_url=webhook_url,
-            drop_pending_updates=True
-        )
+        try:
+            application.run_webhook(
+                listen="0.0.0.0",
+                port=config.PORT,
+                webhook_url=webhook_url,
+                drop_pending_updates=True
+            )
+        except Exception as e:
+            logger.exception(f"❌ run_webhook crashed with error: {e}")
+            sys.exit(1)
         
     except Exception as e:
         logger.error(f"Failed to start webhook bot: {e}")
