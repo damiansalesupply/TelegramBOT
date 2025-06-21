@@ -44,15 +44,24 @@ def setup_environment():
         # Detect if running in Cloud Run or similar production environment
         if os.getenv('K_SERVICE') or os.getenv('GOOGLE_CLOUD_PROJECT'):
             os.environ['ENVIRONMENT'] = 'production'
+        elif os.getenv('REPLIT_DB_URL'):
+            # Running in Replit environment - use development mode for now
+            os.environ['ENVIRONMENT'] = 'development'
         else:
             os.environ['ENVIRONMENT'] = 'development'
     
     # Set webhook URL for production
     if os.getenv('ENVIRONMENT') == 'production':
-        if not os.getenv('WEBHOOK_URL') and os.getenv('K_SERVICE'):
-            # Auto-generate webhook URL for Cloud Run
-            service_url = f"https://{os.getenv('K_SERVICE')}-{os.getenv('GOOGLE_CLOUD_PROJECT')}.a.run.app"
-            os.environ['WEBHOOK_URL'] = f"{service_url}/webhook"
+        if not os.getenv('WEBHOOK_URL'):
+            if os.getenv('K_SERVICE'):
+                # Auto-generate webhook URL for Cloud Run
+                service_url = f"https://{os.getenv('K_SERVICE')}-{os.getenv('GOOGLE_CLOUD_PROJECT')}.a.run.app"
+                os.environ['WEBHOOK_URL'] = f"{service_url}/webhook"
+            elif os.getenv('REPLIT_DB_URL'):
+                # For Replit deployment, use the deployment URL
+                repl_slug = os.getenv('REPL_SLUG', 'telegram-bot')
+                repl_owner = os.getenv('REPL_OWNER', 'user')
+                os.environ['WEBHOOK_URL'] = f"https://{repl_slug}.{repl_owner}.repl.co/webhook"
     
     # Ensure PORT is set
     if not os.getenv('PORT'):

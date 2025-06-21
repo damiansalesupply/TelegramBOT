@@ -53,12 +53,17 @@ async def setup_webhook(config, application):
     logger = logging.getLogger(__name__)
     
     if not config.WEBHOOK_URL:
-        logger.error("WEBHOOK_URL is required for production deployment")
-        raise ValueError("WEBHOOK_URL environment variable must be set for production")
+        logger.warning("WEBHOOK_URL not set, skipping webhook setup for now")
+        logger.info("Webhook will be configured once deployment URL is available")
+        return
     
-    # Set webhook
-    await application.bot.set_webhook(url=config.WEBHOOK_URL)
-    logger.info(f"Webhook set to: {config.WEBHOOK_URL}")
+    try:
+        # Set webhook
+        await application.bot.set_webhook(url=config.WEBHOOK_URL)
+        logger.info(f"Webhook set to: {config.WEBHOOK_URL}")
+    except Exception as e:
+        logger.warning(f"Failed to set webhook: {e}")
+        logger.info("Webhook can be configured manually after deployment")
 
 async def run_webhook_server(config, application):
     """Run webhook server for production"""

@@ -21,8 +21,8 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "ALLOWED_USERS=7668792787 uv add python-telegram-bot && python main.py"
+args = "ALLOWED_USERS=7668792787 python start.py"
 
 [deployment]
-run = ["sh", "-c", "ALLOWED_USERS=7668792787 uv add python-telegram-bot && python main.py"]
+run = ["sh", "-c", "ALLOWED_USERS=7668792787 python start.py"]
 deploymentTarget = "cloudrun"

@@ -119,7 +119,11 @@ This is a Python-based Telegram bot that integrates with OpenAI's Assistant API 
 
 ### Deployment Configuration
 - Automated dependency installation via UV
-- Single command deployment: `uv add python-telegram-bot && python main.py`
+- Enhanced startup script with deployment fixes: `python start.py`
+- Cloud Run autoscale deployment support with proper port binding
+- Webhook support for production environments
+- Single instance management to prevent conflicts
+- Health check endpoints for deployment monitoring
 - Parallel workflow support in Replit environment
 
 ## Changelog
@@ -132,6 +136,13 @@ This is a Python-based Telegram bot that integrates with OpenAI's Assistant API 
   - Administrative commands (/reset, /stats)
   - Thread management and context persistence
   - Comprehensive logging service with configurable options
+- June 21, 2025. Applied deployment fixes for Cloud Run autoscale:
+  - Added webhook support for production deployments
+  - Implemented proper port binding (0.0.0.0:PORT)
+  - Created health check endpoints (/health, /)
+  - Added single instance management to prevent conflicts
+  - Enhanced environment detection and configuration
+  - Added deployment scripts and documentation
 
 ## User Preferences
 
