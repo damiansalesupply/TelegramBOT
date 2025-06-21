@@ -59,9 +59,6 @@ def start_bot_with_polling():
         else:
             logger.info("Whitelist disabled - all users allowed")
         
-        # Set environment variables
-        os.environ["ALLOWED_USERS"] = "7668792787"
-        
         logger.info("Starting bot in polling mode...")
         logger.info("Bot started successfully. Listening for messages...")
         
