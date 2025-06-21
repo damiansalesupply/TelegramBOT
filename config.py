@@ -30,7 +30,7 @@ class Config:
         
         # Deployment configuration
         self.ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
-        self.PORT: int = int(os.getenv("PORT", "5000"))
+        self.PORT: int = int(os.getenv("PORT", "8080"))
         
         # Auto-detect webhook URL for Replit deployment
         if os.getenv("REPL_SLUG") and os.getenv("REPL_OWNER"):
