@@ -7,11 +7,13 @@
 
 ## Deployment Options
 
-### Option 1: Quick Deployment with Conflict Prevention
+### Option 1: Replit Deploy (Webhook Mode)
+W Build command wpisz:
 ```bash
-# Use the automated deployment script
-python deploy.py
+./deploy_script.sh
 ```
+
+Następnie wybierz **Autoscale** - bot automatycznie przejdzie na webhook mode
 
 ### Option 2: Manual Cloud Run Deployment
 ```bash
