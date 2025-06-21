@@ -25,26 +25,49 @@ This is a Python-based Telegram bot that integrates with OpenAI's Assistant API 
 - Validates required configuration on startup
 - Manages API keys, tokens, and operational settings
 - Provides secure credential handling with masked display
+- NEW: Handles whitelist configuration and logging preferences
 
 ### 2. Bot Handler (`bot_handler.py`)
 - Processes incoming Telegram messages
 - Coordinates between Telegram API and OpenAI service
 - Handles user interactions and error responses
 - Implements typing indicators for better UX
+- NEW: User authorization checking against whitelist
+- NEW: Integration with logging and thread management services
 
 ### 3. OpenAI Service (`openai_service.py`)
 - Manages OpenAI Assistant API communication
 - Creates conversation threads for each user interaction
 - Handles API retries and error scenarios
 - Processes assistant responses asynchronously
+- NEW: Supports persistent thread context for continuous conversations
 
-### 4. Main Application (`main.py`)
+### 4. Thread Manager (`thread_manager.py`)
+- NEW: Manages conversation threads per user for context persistence
+- Stores thread mappings in local JSON file
+- Provides thread creation, retrieval, and cleanup functions
+- Maintains conversation continuity across sessions
+
+### 5. Logging Service (`logging_service.py`)
+- NEW: Comprehensive conversation logging system
+- CSV file logging with automatic header creation
+- Google Sheets integration for real-time logging
+- Configurable logging options (can disable CSV or Sheets independently)
+
+### 6. Command Handler (`command_handler.py`)
+- NEW: Handles administrative bot commands
+- /reset - Clear user's conversation context
+- /stats - Display bot statistics and configuration status
+- Authorization checks for all commands
+
+### 7. Main Application (`main.py`)
 - Entry point for the application
 - Sets up logging and configuration
 - Initializes bot handlers and message filters
 - Manages the bot's lifecycle
+- NEW: Integrates all new services and command handlers
 
-### 5. Utilities (`utils.py`)
+### 8. Utilities (`utils.py`)
 - Logging configuration and setup
 - Text processing helper functions
 - Common utility functions for the application
@@ -52,11 +75,13 @@ This is a Python-based Telegram bot that integrates with OpenAI's Assistant API 
 ## Data Flow
 
 1. **Message Reception**: User sends message to Telegram bot
-2. **Message Processing**: Bot handler receives update from Telegram
-3. **AI Processing**: Message forwarded to OpenAI Assistant via API
-4. **Thread Management**: OpenAI creates conversation thread and processes message
-5. **Response Generation**: Assistant generates intelligent response
-6. **Response Delivery**: Bot sends response back to user via Telegram
+2. **Authorization Check**: Bot verifies user is in whitelist (if enabled)
+3. **Thread Management**: Bot retrieves or creates persistent conversation thread for user
+4. **Message Processing**: Bot handler receives update from Telegram
+5. **AI Processing**: Message forwarded to OpenAI Assistant via API with thread context
+6. **Response Generation**: Assistant generates intelligent response using conversation history
+7. **Response Delivery**: Bot sends response back to user via Telegram
+8. **Logging**: Conversation is logged to CSV file and Google Sheets (if enabled)
 
 ## External Dependencies
 
@@ -73,6 +98,11 @@ This is a Python-based Telegram bot that integrates with OpenAI's Assistant API 
 - `LOG_LEVEL`: Logging verbosity (default: INFO)
 - `MAX_RETRIES`: API retry attempts (default: 3)
 - `TIMEOUT_SECONDS`: Request timeout (default: 60)
+- `ALLOWED_USERS`: Comma-separated Telegram user IDs for whitelist access control
+- `SHEET_NAME`: Google Sheets document name for logging (default: SupportLogs)
+- `ENABLE_CSV_LOGGING`: Enable/disable CSV conversation logging (default: true)
+- `ENABLE_SHEETS_LOGGING`: Enable/disable Google Sheets logging (default: true)
+- `CREDENTIALS_FILE`: Path to Google service account credentials (default: credentials.json)
 
 ## Deployment Strategy
 
@@ -95,7 +125,15 @@ This is a Python-based Telegram bot that integrates with OpenAI's Assistant API 
 ## Changelog
 
 - June 21, 2025. Initial setup
+- June 21, 2025. Added advanced features:
+  - User whitelist authorization system
+  - Persistent conversation threads per user
+  - CSV and Google Sheets logging integration
+  - Administrative commands (/reset, /stats)
+  - Thread management and context persistence
+  - Comprehensive logging service with configurable options
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Request: Add new advanced features including whitelist, context memory, and logging capabilities.
