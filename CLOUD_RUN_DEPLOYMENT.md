@@ -1,21 +1,21 @@
 # Cloud Run Deployment Guide
 
 ## Current Status
-- Bot is functional despite polling conflict from another instance
+- Bot fully operational with conflict prevention system
 - All features working: messaging, OpenAI integration, authorization, logging
-- Ready for production deployment to Cloud Run
+- Deployment scripts ready with automatic instance management
 
-## Deployment Steps
+## Deployment Options
 
-### 1. Stop Conflicting Instances
-Before deploying, find and stop the other bot instance:
-- Check other Replit projects/deployments
-- Look for local development environments
-- Verify no other servers running this bot
-
-### 2. Deploy to Cloud Run
+### Option 1: Quick Deployment with Conflict Prevention
 ```bash
-# Build and deploy
+# Use the automated deployment script
+python deploy.py
+```
+
+### Option 2: Manual Cloud Run Deployment
+```bash
+# Build and deploy with conflict prevention
 gcloud run deploy salesupply-bot \
   --source . \
   --platform managed \
@@ -23,6 +23,13 @@ gcloud run deploy salesupply-bot \
   --allow-unauthenticated \
   --port 5000 \
   --set-env-vars="TELEGRAM_TOKEN=${TELEGRAM_TOKEN},OPENAI_API_KEY=${OPENAI_API_KEY},ASSISTANT_ID=asst_qgWQNNJGV0bGPy35Rdif4qpb,ALLOWED_USERS=7668792787"
+```
+
+### Option 3: Advanced Build Pipeline
+```bash
+# Use Cloud Build with automated conflict resolution
+gcloud builds submit --config cloudbuild.yaml \
+  --substitutions _TELEGRAM_TOKEN=${TELEGRAM_TOKEN},_OPENAI_API_KEY=${OPENAI_API_KEY}
 ```
 
 ### 3. Configure Webhook

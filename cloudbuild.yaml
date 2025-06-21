@@ -1,0 +1,59 @@
+# Cloud Build configuration for Google Cloud Run
+steps:
+  # Step 1: Stop any existing instances
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Stopping existing Cloud Run service..."
+        gcloud run services delete salesupply-bot --region=us-central1 --quiet || echo "No existing service found"
+        
+  # Step 2: Clear webhook before deployment
+  - name: 'python:3.11'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install python-telegram-bot
+        python -c "
+        import asyncio
+        from telegram.ext import Application
+        async def clear_webhook():
+            app = Application.builder().token('$_TELEGRAM_TOKEN').build()
+            result = await app.bot.delete_webhook(drop_pending_updates=True)
+            print(f'Webhook cleared: {result}')
+        asyncio.run(clear_webhook())
+        "
+
+  # Step 3: Build and deploy
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'salesupply-bot'
+      - '--source=.'
+      - '--platform=managed'
+      - '--region=us-central1'
+      - '--allow-unauthenticated'
+      - '--port=5000'
+      - '--set-env-vars=TELEGRAM_TOKEN=$_TELEGRAM_TOKEN,OPENAI_API_KEY=$_OPENAI_API_KEY,ASSISTANT_ID=asst_qgWQNNJGV0bGPy35Rdif4qpb,ALLOWED_USERS=7668792787'
+
+  # Step 4: Set webhook to new deployment
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        SERVICE_URL=$(gcloud run services describe salesupply-bot --region=us-central1 --format='value(status.url)')
+        curl -X POST "https://api.telegram.org/bot$_TELEGRAM_TOKEN/setWebhook" \
+          -d "url=$SERVICE_URL/webhook" \
+          -d "drop_pending_updates=true"
+        echo "Webhook set to: $SERVICE_URL/webhook"
+
+substitutions:
+  _TELEGRAM_TOKEN: 'TELEGRAM_TOKEN_PLACEHOLDER'
+  _OPENAI_API_KEY: 'OPENAI_API_KEY_PLACEHOLDER'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
