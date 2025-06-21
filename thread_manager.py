@@ -9,6 +9,7 @@ import os
 from typing import Dict, Optional
 from openai import OpenAI
 from config import Config
+from database_service import DatabaseService
 
 
 class ThreadManager:
@@ -18,9 +19,17 @@ class ThreadManager:
         self.config = config
         self.client = OpenAI(api_key=config.OPENAI_API_KEY)
         self.logger = logging.getLogger(__name__)
-        self.threads_file = "user_threads.json"
-        self._user_threads: Dict[int, str] = {}
-        self._load_threads()
+        
+        # Initialize database service with fallback to file storage
+        try:
+            self.db_service = DatabaseService()
+            self.logger.info("ThreadManager using database backend")
+        except Exception as e:
+            self.logger.warning(f"Database not available, using file backend: {e}")
+            self.db_service = None
+            self.threads_file = "user_threads.json"
+            self._user_threads: Dict[int, str] = {}
+            self._load_threads()
     
     def _load_threads(self) -> None:
         """Load existing threads from file"""
