@@ -27,6 +27,12 @@ class Config:
         self.ENABLE_CSV_LOGGING: bool = os.getenv("ENABLE_CSV_LOGGING", "true").lower() == "true"
         self.ENABLE_SHEETS_LOGGING: bool = os.getenv("ENABLE_SHEETS_LOGGING", "true").lower() == "true"
         self.CREDENTIALS_FILE: str = os.getenv("CREDENTIALS_FILE", "credentials.json")
+        
+        # Deployment configuration
+        self.ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
+        self.PORT: int = int(os.getenv("PORT", "5000"))
+        self.WEBHOOK_URL: Optional[str] = os.getenv("WEBHOOK_URL")
+        self.USE_WEBHOOKS: bool = self.ENVIRONMENT == "production"
     
     def _parse_allowed_users(self, users_str: str) -> list:
         """Parse comma-separated user IDs from environment variable"""
