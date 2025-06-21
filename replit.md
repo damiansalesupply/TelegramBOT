@@ -156,6 +156,12 @@ This is a Python-based Telegram bot that integrates with OpenAI's Assistant API 
   - Added health check endpoints for deployment stability
   - Deploy script with conflict prevention and mode switching
   - Ready for Autoscale deployment with build command: ./deploy_script.sh
+- June 21, 2025. AUTOSCALE ARCHITECTURE FIX:
+  - Restructured main.py as smart mode selector (PORT detection)
+  - Separated start.py (webhook) and simple_bot.py (polling)
+  - Installed python-telegram-bot[webhooks] for production support
+  - Eliminated polling conflicts in autoscale deployments
+  - DEPLOYMENT COMMAND: PORT=5000 ALLOWED_USERS=7668792787 python main.py
 
 ## User Preferences
 
