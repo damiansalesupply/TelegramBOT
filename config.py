@@ -31,8 +31,15 @@ class Config:
         # Deployment configuration
         self.ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
         self.PORT: int = int(os.getenv("PORT", "5000"))
-        self.WEBHOOK_URL: Optional[str] = os.getenv("WEBHOOK_URL")
-        self.USE_WEBHOOKS: bool = self.ENVIRONMENT == "production"
+        
+        # Auto-detect webhook URL for Replit deployment
+        if os.getenv("REPL_SLUG") and os.getenv("REPL_OWNER"):
+            self.WEBHOOK_URL = f"https://{os.getenv('REPL_SLUG')}.{os.getenv('REPL_OWNER')}.replit.app/webhook"
+        else:
+            self.WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+            
+        # Auto-detect production environment
+        self.USE_WEBHOOKS: bool = bool(os.getenv("PORT")) or self.ENVIRONMENT == "production"
     
     def _parse_allowed_users(self, users_str: str) -> list:
         """Parse comma-separated user IDs from environment variable"""

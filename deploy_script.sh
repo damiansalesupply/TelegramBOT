@@ -28,11 +28,11 @@ asyncio.run(clear_webhook())
 " || echo "Warning: Could not clear webhook"
 
 # Step 3: Start the bot
-echo "🤖 Starting bot in production mode..."
-if [ "$PORT" ] || [ "$GOOGLE_CLOUD_PROJECT" ] || [ "$K_SERVICE" ]; then
-    echo "Production environment detected - using webhook mode"
-    ALLOWED_USERS=7668792787 python start.py
-else
-    echo "Development environment - using polling mode"
+echo "🤖 Starting bot..."
+if [ -z "$PORT" ]; then
+    echo "Dev mode detected: using polling"
     ALLOWED_USERS=7668792787 python simple_bot.py
+else
+    echo "Prod mode detected: using webhook"
+    ALLOWED_USERS=7668792787 python main.py
 fi

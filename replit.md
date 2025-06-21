@@ -150,6 +150,12 @@ This is a Python-based Telegram bot that integrates with OpenAI's Assistant API 
   - Confirmed message processing, authorization, and logging systems
   - Polish error messages implemented (❌ Błąd: format)
   - Bot fully operational and ready for Cloud Run deployment
+- June 21, 2025. FINAL DEPLOYMENT CONFIGURATION:
+  - Auto-configured webhook URL for Replit deployments
+  - Implemented proper environment detection (dev/prod modes)
+  - Added health check endpoints for deployment stability
+  - Deploy script with conflict prevention and mode switching
+  - Ready for Autoscale deployment with build command: ./deploy_script.sh
 
 ## User Preferences
 
