@@ -6,9 +6,11 @@ Main entry point for the application
 
 import logging
 import sys
-from telegram.ext import Application, MessageHandler, filters
+from telegram.ext import Application, MessageHandler, CommandHandler, filters
 from config import Config
 from bot_handler import BotHandler
+from command_handler import CommandHandler as BotCommandHandler
+from thread_manager import ThreadManager
 from utils import setup_logging
 
 def main():
@@ -25,11 +27,17 @@ def main():
         logger.info("Starting Telegram bot...")
         logger.info(f"Bot will use Assistant ID: {config.ASSISTANT_ID}")
         
-        # Initialize bot handler
+        # Initialize components
         bot_handler = BotHandler(config)
+        thread_manager = ThreadManager(config)
+        command_handler = BotCommandHandler(config, thread_manager)
         
         # Create application
         application = Application.builder().token(config.TELEGRAM_TOKEN).build()
+        
+        # Add command handlers
+        application.add_handler(CommandHandler("reset", command_handler.handle_reset))
+        application.add_handler(CommandHandler("stats", command_handler.handle_stats))
         
         # Add message handler for text messages (excluding commands)
         message_handler = MessageHandler(
@@ -40,6 +48,13 @@ def main():
         
         # Add error handler
         application.add_error_handler(bot_handler.handle_error)
+        
+        # Log configuration
+        logger.info(f"Configuration: {config}")
+        if config.ALLOWED_USERS:
+            logger.info(f"Whitelist enabled with {len(config.ALLOWED_USERS)} authorized users")
+        else:
+            logger.info("Whitelist disabled - all users allowed")
         
         logger.info("Bot started successfully. Listening for messages...")
         

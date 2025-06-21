@@ -83,7 +83,7 @@ class BotHandler:
         self.logger.error(f"Update {update} caused error: {context.error}")
         
         # If we have a chat_id, send error message to user
-        if update and hasattr(update, 'message') and update.message:
+        if update and hasattr(update, 'message') and hasattr(update, 'message') and update.message:
             chat_id = update.message.chat_id
             try:
                 await context.bot.send_message(

@@ -17,12 +17,13 @@ class OpenAIService:
         self.client = OpenAI(api_key=config.OPENAI_API_KEY)
         self.logger = logging.getLogger(__name__)
     
-    async def get_assistant_response(self, user_message: str, thread_id: str = None) -> str:
+    async def get_assistant_response(self, user_message: str, thread_id: Optional[str] = None) -> str:
         """
         Get response from OpenAI Assistant
         
         Args:
             user_message: The user's message to process
+            thread_id: Optional thread ID for context persistence
             
         Returns:
             Assistant's response as a string
@@ -31,29 +32,36 @@ class OpenAIService:
             Exception: If the API call fails or times out
         """
         try:
-            self.logger.debug(f"Creating thread for message: {user_message[:50]}...")
-            
-            # Create a new thread for this conversation
-            thread = self.client.beta.threads.create()
-            self.logger.debug(f"Created thread: {thread.id}")
+            # Use provided thread_id or create a new one
+            if thread_id:
+                self.logger.debug(f"Using existing thread: {thread_id}")
+                actual_thread_id = thread_id
+            else:
+                self.logger.debug(f"Creating new thread for message: {user_message[:50]}...")
+                thread = self.client.beta.threads.create()
+                actual_thread_id = thread.id
+                self.logger.debug(f"Created thread: {actual_thread_id}")
             
             # Add the user's message to the thread
             self.client.beta.threads.messages.create(
-                thread_id=thread.id,
+                thread_id=actual_thread_id,
                 role="user",
                 content=user_message
             )
             
             # Create and start a run with the assistant
+            if not self.config.ASSISTANT_ID:
+                raise Exception("Assistant ID not configured")
+                
             run = self.client.beta.threads.runs.create(
                 assistant_id=self.config.ASSISTANT_ID,
-                thread_id=thread.id
+                thread_id=actual_thread_id
             )
             
             self.logger.debug(f"Started run: {run.id}")
             
             # Wait for the run to complete with timeout
-            response_text = await self._wait_for_completion(thread.id, run.id)
+            response_text = await self._wait_for_completion(actual_thread_id, run.id)
             
             self.logger.info("Successfully got response from OpenAI Assistant")
             return response_text
@@ -106,8 +114,12 @@ class OpenAIService:
                         if message.role == "assistant":
                             if message.content and len(message.content) > 0:
                                 content = message.content[0]
-                                if hasattr(content, 'text') and hasattr(content.text, 'value'):
-                                    return content.text.value
+                                # Handle different content types safely
+                                try:
+                                    if hasattr(content, 'text') and content.text and hasattr(content.text, 'value'):
+                                        return content.text.value
+                                except AttributeError:
+                                    continue
                     
                     raise Exception("No valid response content found")
                 
