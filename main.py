@@ -158,15 +158,9 @@ def main():
             
             asyncio.run(run_production())
         else:
-            logger.info("Starting bot in development mode with polling...")
-            logger.info("Bot started successfully. Listening for messages...")
-            
-            # Run polling mode with webhook cleanup
-            application.run_polling(
-                allowed_updates=["message"],
-                drop_pending_updates=True,
-                close_loop=False
-            )
+            logger.error("Polling mode not supported in production - use webhook mode")
+            logger.error("This should only run in development with simple_bot.py")
+            sys.exit(1)
         
     except Exception as e:
         logging.error(f"Failed to start bot: {str(e)}")
