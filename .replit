@@ -25,3 +25,4 @@ args = "ALLOWED_USERS=7668792787 uv add python-telegram-bot && python main.py"
 
 [deployment]
 run = ["sh", "-c", "ALLOWED_USERS=7668792787 uv add python-telegram-bot && python main.py"]
+deploymentTarget = "cloudrun"
