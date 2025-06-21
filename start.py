@@ -82,6 +82,7 @@ def start_bot_with_webhook():
                 listen="0.0.0.0",
                 port=config.PORT,
                 webhook_url=webhook_url,
+                webhook_path="/",
                 drop_pending_updates=True
             )
         except Exception as e:
