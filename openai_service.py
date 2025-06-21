@@ -17,7 +17,7 @@ class OpenAIService:
         self.client = OpenAI(api_key=config.OPENAI_API_KEY)
         self.logger = logging.getLogger(__name__)
     
-    async def get_assistant_response(self, user_message: str) -> str:
+    async def get_assistant_response(self, user_message: str, thread_id: str = None) -> str:
         """
         Get response from OpenAI Assistant
         

@@ -7,6 +7,8 @@ import logging
 from telegram import Update
 from telegram.ext import ContextTypes
 from openai_service import OpenAIService
+from logging_service import LoggingService
+from thread_manager import ThreadManager
 from config import Config
 
 class BotHandler:
@@ -15,6 +17,8 @@ class BotHandler:
     def __init__(self, config: Config):
         self.config = config
         self.openai_service = OpenAIService(config)
+        self.logging_service = LoggingService(config)
+        self.thread_manager = ThreadManager(config)
         self.logger = logging.getLogger(__name__)
     
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -30,19 +34,35 @@ class BotHandler:
         
         chat_id = update.message.chat_id
         user_message = update.message.text
-        user_id = update.message.from_user.id if update.message.from_user else "unknown"
+        user_id = update.message.from_user.id if update.message.from_user else 0
+        user_name = update.message.from_user.full_name if update.message.from_user else "Unknown"
         
-        self.logger.info(f"Received message from user {user_id} in chat {chat_id}: {user_message[:100]}...")
+        self.logger.info(f"Received message from user {user_id} ({user_name}) in chat {chat_id}: {user_message[:100]}...")
+        
+        # Check whitelist authorization
+        if self.config.ALLOWED_USERS and user_id not in self.config.ALLOWED_USERS:
+            await context.bot.send_message(
+                chat_id=chat_id, 
+                text="❌ You don't have access to this bot."
+            )
+            self.logger.warning(f"Unauthorized access attempt from user {user_id} ({user_name})")
+            return
         
         try:
             # Send typing indicator to show bot is processing
             await context.bot.send_chat_action(chat_id=chat_id, action="typing")
             
-            # Get response from OpenAI Assistant
-            response = await self.openai_service.get_assistant_response(user_message)
+            # Get or create thread for this user to maintain context
+            thread_id = self.thread_manager.get_or_create_thread(user_id)
+            
+            # Get response from OpenAI Assistant with persistent context
+            response = await self.openai_service.get_assistant_response(user_message, thread_id)
             
             # Send response back to user
             await context.bot.send_message(chat_id=chat_id, text=response)
+            
+            # Log the conversation
+            self.logging_service.log_conversation(user_id, user_name, user_message, response)
             
             self.logger.info(f"Successfully sent response to user {user_id} in chat {chat_id}")
             
