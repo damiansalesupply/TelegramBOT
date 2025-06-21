@@ -21,8 +21,8 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "ALLOWED_USERS=7668792787 python start.py"
+args = "ALLOWED_USERS=7668792787 python simple_bot.py"
 
 [deployment]
-run = ["sh", "-c", "ALLOWED_USERS=7668792787 python start.py"]
+run = ["sh", "-c", "ALLOWED_USERS=7668792787 python simple_bot.py"]
 deploymentTarget = "cloudrun"

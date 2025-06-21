@@ -161,10 +161,11 @@ def main():
             logger.info("Starting bot in development mode with polling...")
             logger.info("Bot started successfully. Listening for messages...")
             
-            # Run polling mode
+            # Run polling mode with webhook cleanup
             application.run_polling(
                 allowed_updates=["message"],
-                drop_pending_updates=True
+                drop_pending_updates=True,
+                close_loop=False
             )
         
     except Exception as e:
