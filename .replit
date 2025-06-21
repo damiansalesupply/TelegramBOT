@@ -21,7 +21,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "PORT=5000 ALLOWED_USERS=7668792787 python main.py"
+args = "ALLOWED_USERS=7668792787 PORT=5000 python start.py"
 waitForPort = 5000
 
 [deployment]
