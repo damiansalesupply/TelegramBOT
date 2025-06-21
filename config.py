@@ -5,6 +5,10 @@ Handles environment variables and validation
 
 import os
 from typing import Optional
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 class Config:
     """Configuration class for managing environment variables"""
