@@ -58,14 +58,18 @@ def start_bot_with_webhook():
         if config.ALLOWED_USERS:
             logger.info(f"Whitelist enabled with {len(config.ALLOWED_USERS)} authorized users")
         
-        # Set environment variables
-        os.environ["ALLOWED_USERS"] = "7668792787"
-        
-        # Get webhook URL
+        # Get webhook URL with auto-generation
         webhook_url = config.WEBHOOK_URL
+        
+        # Auto-generate from Replit if not set
         if not webhook_url:
-            logger.error("WEBHOOK_URL not configured for production")
-            sys.exit(1)
+            replit_url = os.environ.get("REPLIT_WEB_HOSTNAME")
+            if replit_url:
+                webhook_url = f"https://{replit_url}/webhook"
+                logger.info(f"Auto-generated webhook URL: {webhook_url}")
+            else:
+                logger.error("WEBHOOK_URL not set and REPLIT_WEB_HOSTNAME not available")
+                sys.exit(1)
             
         logger.info(f"Starting webhook server on port {config.PORT}")
         logger.info(f"Webhook URL: {webhook_url}")
@@ -83,4 +87,8 @@ def start_bot_with_webhook():
         sys.exit(1)
 
 if __name__ == "__main__":
-    start_bot_with_webhook()
+    if os.getenv("PORT"):
+        start_bot_with_webhook()
+    else:
+        print("Error: This script is intended for production (PORT must be set)")
+        sys.exit(1)
