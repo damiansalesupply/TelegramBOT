@@ -4,8 +4,9 @@ Simplified Telegram bot without webhook conflicts
 Pure polling mode implementation
 """
 
-import logging
+import os
 import sys
+import logging
 from telegram.ext import Application, MessageHandler, CommandHandler, filters
 from config import Config
 from bot_handler import BotHandler
@@ -13,18 +14,17 @@ from command_handler import CommandHandler as BotCommandHandler
 from thread_manager import ThreadManager
 from utils import setup_logging
 
-def main():
-    """Main function to start the Telegram bot in pure polling mode"""
+def start_bot_with_polling():
+    """Start bot in polling mode for development"""
+    setup_logging()
+    logger = logging.getLogger(__name__)
+    
     try:
-        # Setup logging
-        setup_logging()
-        logger = logging.getLogger(__name__)
-        
         # Load configuration
         config = Config()
         config.validate()
         
-        logger.info("Starting Telegram bot...")
+        logger.info("Starting Telegram bot in polling mode...")
         logger.info(f"Bot will use Assistant ID: {config.ASSISTANT_ID}")
         
         # Initialize components
@@ -32,7 +32,10 @@ def main():
         thread_manager = ThreadManager(config)
         command_handler = BotCommandHandler(config, thread_manager)
         
-        # Create application
+        # Create application with proper token validation
+        if not config.TELEGRAM_TOKEN:
+            raise ValueError("TELEGRAM_TOKEN is required")
+            
         application = Application.builder().token(config.TELEGRAM_TOKEN).build()
         
         # Add command handlers
@@ -56,6 +59,9 @@ def main():
         else:
             logger.info("Whitelist disabled - all users allowed")
         
+        # Set environment variables
+        os.environ["ALLOWED_USERS"] = "7668792787"
+        
         logger.info("Starting bot in polling mode...")
         logger.info("Bot started successfully. Listening for messages...")
         
@@ -68,6 +74,10 @@ def main():
     except Exception as e:
         logging.error(f"Failed to start bot: {str(e)}")
         sys.exit(1)
+
+def main():
+    """Main function wrapper"""
+    start_bot_with_polling()
 
 if __name__ == '__main__':
     main()

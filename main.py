@@ -1,21 +1,28 @@
 #!/usr/bin/env python3
 """
 Telegram Bot with OpenAI Assistant API Integration
-Main entry point for the application
+Main entry point with mode selection
 """
 
-import logging
-import sys
-import signal
-import asyncio
-from aiohttp import web
-from telegram import Update
-from telegram.ext import Application, MessageHandler, CommandHandler, filters
-from config import Config
-from bot_handler import BotHandler
-from command_handler import CommandHandler as BotCommandHandler
-from thread_manager import ThreadManager
-from utils import setup_logging
+import os
+
+def main():
+    """Main function to select deployment mode"""
+    
+    # Detect environment
+    IS_AUTOSCALE = os.getenv("PORT") is not None
+    
+    if IS_AUTOSCALE:
+        print("🔗 Production mode detected: starting webhook")
+        from start import start_bot_with_webhook
+        start_bot_with_webhook()
+    else:
+        print("🔄 Development mode detected: starting polling")
+        from simple_bot import start_bot_with_polling
+        start_bot_with_polling()
+
+if __name__ == '__main__':
+    main()
 
 # Global application instance for graceful shutdown
 app_instance = None
