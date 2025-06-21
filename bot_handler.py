@@ -67,10 +67,13 @@ class BotHandler:
             self.logger.info(f"Successfully sent response to user {user_id} in chat {chat_id}")
             
         except Exception as e:
-            error_message = f"❌ Sorry, I encountered an error while processing your message. Please try again later."
-            await context.bot.send_message(chat_id=chat_id, text=error_message)
+            error_message = f"❌ Błąd: {str(e)}"
+            try:
+                await context.bot.send_message(chat_id=chat_id, text=error_message)
+            except Exception as send_error:
+                self.logger.error(f"Failed to send error message: {send_error}")
             
-            self.logger.error(f"Error handling message from user {user_id}: {str(e)}")
+            self.logger.error(f"Error handling message from user {user_id}: {str(e)}", exc_info=True)
     
     async def handle_error(self, update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
         """
