@@ -6,6 +6,8 @@ Handles CSV and Google Sheets logging functionality
 import csv
 import logging
 import os
+import json
+import base64
 from datetime import datetime
 from typing import Optional, Any
 import gspread
@@ -48,23 +50,44 @@ class LoggingService:
             
         if not self._sheets_initialized:
             try:
-                # Check if credentials file exists
-                if not os.path.exists(self.config.CREDENTIALS_FILE):
-                    self.logger.warning(f"Google Sheets credentials file not found: {self.config.CREDENTIALS_FILE}")
-                    self._sheets_initialized = True
-                    return None
-                
-                scope = [
-                    "https://spreadsheets.google.com/feeds",
-                    "https://www.googleapis.com/auth/drive"
-                ]
-                creds = ServiceAccountCredentials.from_json_keyfile_name(
-                    self.config.CREDENTIALS_FILE, scope  # type: ignore
-                )
-                client = gspread.authorize(creds)  # type: ignore
-                sheet = client.open(self.config.SHEET_NAME).sheet1
-                self._worksheet = sheet
-                self.logger.info(f"Connected to Google Sheets: {self.config.SHEET_NAME}")
+                # Try to get credentials from environment variable first
+                if self.config.GOOGLE_SERVICE_ACCOUNT_JSON:
+                    try:
+                        # Decode base64 credentials from environment
+                        credentials_json = base64.b64decode(self.config.GOOGLE_SERVICE_ACCOUNT_JSON).decode("utf-8")
+                        creds_dict = json.loads(credentials_json)
+                        
+                        scope = [
+                            "https://spreadsheets.google.com/feeds",
+                            "https://www.googleapis.com/auth/drive"
+                        ]
+                        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+                        client = gspread.authorize(creds)  # type: ignore
+                        sheet = client.open(self.config.SHEET_NAME).sheet1
+                        self._worksheet = sheet
+                        self.logger.info(f"Connected to Google Sheets using environment credentials: {self.config.SHEET_NAME}")
+                        
+                    except Exception as e:
+                        self.logger.error(f"Failed to decode environment credentials: {str(e)}")
+                        self._worksheet = None
+                        
+                # Fallback to file-based credentials if environment not available
+                elif os.path.exists(self.config.CREDENTIALS_FILE):
+                    scope = [
+                        "https://spreadsheets.google.com/feeds",
+                        "https://www.googleapis.com/auth/drive"
+                    ]
+                    creds = ServiceAccountCredentials.from_json_keyfile_name(
+                        self.config.CREDENTIALS_FILE, scope  # type: ignore
+                    )
+                    client = gspread.authorize(creds)  # type: ignore
+                    sheet = client.open(self.config.SHEET_NAME).sheet1
+                    self._worksheet = sheet
+                    self.logger.info(f"Connected to Google Sheets using file credentials: {self.config.SHEET_NAME}")
+                    
+                else:
+                    self.logger.warning("No Google Sheets credentials found (neither environment nor file)")
+                    self._worksheet = None
                 
             except Exception as e:
                 self.logger.error(f"Failed to connect to Google Sheets: {str(e)}")

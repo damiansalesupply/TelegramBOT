@@ -27,6 +27,7 @@ class Config:
         self.ENABLE_CSV_LOGGING: bool = os.getenv("ENABLE_CSV_LOGGING", "true").lower() == "true"
         self.ENABLE_SHEETS_LOGGING: bool = os.getenv("ENABLE_SHEETS_LOGGING", "true").lower() == "true"
         self.CREDENTIALS_FILE: str = os.getenv("CREDENTIALS_FILE", "credentials.json")
+        self.GOOGLE_SERVICE_ACCOUNT_JSON: str = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", "")
         
         # Deployment configuration
         self.ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
