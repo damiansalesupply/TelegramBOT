@@ -59,7 +59,7 @@ def main():
         logger.info("Starting bot in polling mode...")
         logger.info("Bot started successfully. Listening for messages...")
         
-        # Run the bot with simple polling
+        # Run the bot with simple polling - will clear webhooks automatically
         application.run_polling(
             allowed_updates=["message"],
             drop_pending_updates=True
