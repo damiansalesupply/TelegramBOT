@@ -29,10 +29,10 @@ asyncio.run(clear_webhook())
 
 # Step 3: Start the bot
 echo "🤖 Starting bot in production mode..."
-if [ "$REPLIT_ENVIRONMENT" = "production" ]; then
-    echo "Using production configuration"
+if [ "$PORT" ] || [ "$GOOGLE_CLOUD_PROJECT" ] || [ "$K_SERVICE" ]; then
+    echo "Production environment detected - using webhook mode"
     ALLOWED_USERS=7668792787 python start.py
 else
-    echo "Using development configuration"
+    echo "Development environment - using polling mode"
     ALLOWED_USERS=7668792787 python simple_bot.py
 fi
